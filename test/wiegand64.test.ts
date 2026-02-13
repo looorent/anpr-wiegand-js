@@ -85,6 +85,10 @@ describe("wiegand64", () => {
       ["6000000000000033", "Z"],
       ["6000011C1FBD3615", "1WFV385"],
       ["600002191555EBDB", "HK55EVB"],
+      // 0x6FFFFFFFFFFFFFFF = Header (6) + ten blocks of 111111 (63)
+      ["6FFFFFFFFFFFFFFF", "??????????"],
+      // 0x600000000000003F = Header (6) + nine blocks of 000000 (space) + one block of 111111 (63) -> " ?" -> trimmed to "?"
+      ["600000000000003F", "?"],
     ])("decode('%s') returns '%s'", (hex, expectedPlate) => {
       expect(decode(hex)).toBe(expectedPlate);
     });

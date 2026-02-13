@@ -30,6 +30,7 @@ export function encode(textLicencePlate: string | null | undefined): string | un
 
 /**
  * Decodes a Wiegand 64-bit hexadecimal string back to a license plate.
+ * Unknown characters (not matching [A-Z0-9 ]) are decoded as "?".
  * @param wiegand64InHexadecimal a 16-character hexadecimal string
  * @returns the decoded license plate (uppercase), or undefined if the input is empty
  */
