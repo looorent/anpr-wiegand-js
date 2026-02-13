@@ -43,11 +43,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/looorent/anpr-wiegand.git"
+    "url": "git+https://github.com/looorent/anpr-wiegand-js.git"
   },
-  "homepage": "https://github.com/looorent/anpr-wiegand#readme",
+  "homepage": "https://github.com/looorent/anpr-wiegand-js#readme",
   "bugs": {
-    "url": "https://github.com/looorent/anpr-wiegand/issues"
+    "url": "https://github.com/looorent/anpr-wiegand-js/issues"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.15",
