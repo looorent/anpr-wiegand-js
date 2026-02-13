@@ -6,10 +6,16 @@ const MAX_NUMBER_OF_CHARACTERS = 10;
 const HEADER = BigInt(0b0110) << 60n;
 const NUMBER_OF_BITS_PER_CHARACTER = 6;
 
+// The character set used for Wiegand 64 encoding
+// '0' starts at index 0, but in Wiegand 64, '0' maps to 0b010000 (16 decimal)
+// So we use an offset of 16 when mapping index -> value
 const CHARACTER_SET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VALUE_OFFSET = 0b010000;
+
+// Reverse lookup array: index = Wiegand value, value = character
 const REVERSE_LOOKUP: string[] = new Array(64).fill("?");
-REVERSE_LOOKUP[EMPTY] = " ";
+// Populate reverse lookup
+REVERSE_LOOKUP[EMPTY] = " "; // 0 -> Space
 for (let i = 0; i < CHARACTER_SET.length; i++) {
   REVERSE_LOOKUP[VALUE_OFFSET + i] = CHARACTER_SET[i];
 }
@@ -17,10 +23,10 @@ for (let i = 0; i < CHARACTER_SET.length; i++) {
 /**
  * Converts a license plate to a Wiegand 64-bit hexadecimal string.
  * @param textLicencePlate must have length <= 10 characters
- * @returns an uppercase hexadecimal representation in the Wiegand 64-bit format, or undefined when the provided license plate is blank or null
+ * @returns a Promise resolving to an uppercase hexadecimal representation in the Wiegand 64-bit format, or undefined when the provided license plate is blank or null
  * @throws Error when the license plate exceeds 10 characters
  */
-export function encode(textLicencePlate: string | null | undefined): string | undefined {
+export async function encode(textLicencePlate: string | null | undefined): Promise<string | undefined> {
   const sanitized = sanitize(textLicencePlate);
   if (sanitized && sanitized?.length > 0) {
     if (sanitized.length > MAX_NUMBER_OF_CHARACTERS) {
@@ -37,9 +43,9 @@ export function encode(textLicencePlate: string | null | undefined): string | un
  * Decodes a Wiegand 64-bit hexadecimal string back to a license plate.
  * Unknown characters (not matching [A-Z0-9 ]) are decoded as "?".
  * @param wiegand64InHexadecimal a 16-character hexadecimal string
- * @returns the decoded license plate (uppercase), or undefined if the input is empty
+ * @returns a Promise resolving to the decoded license plate (uppercase), or undefined if the input is empty
  */
-export function decode(wiegand64InHexadecimal: string | null | undefined): string | undefined {
+export async function decode(wiegand64InHexadecimal: string | null | undefined): Promise<string | undefined> {
   if (wiegand64InHexadecimal && wiegand64InHexadecimal.trim().length > 0) {
     const bits = BigInt(`0x${wiegand64InHexadecimal}`);
     let result = "";
@@ -58,14 +64,12 @@ export function decode(wiegand64InHexadecimal: string | null | undefined): strin
 function findBinaryRepresentationOf(character: string): number {
   if (character === " ") {
     return EMPTY;
-  } else {
-    const index = CHARACTER_SET.indexOf(character);
-    if (index !== -1) {
-      return VALUE_OFFSET + index;
-    } else {
-      return UNKNOWN_CHARACTER;
-    }
   }
+  const index = CHARACTER_SET.indexOf(character);
+  if (index !== -1) {
+    return VALUE_OFFSET + index;
+  }
+  return UNKNOWN_CHARACTER;
 }
 
 function computeBinaryMask(position: number, character: string): bigint {

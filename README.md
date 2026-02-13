@@ -25,7 +25,7 @@ npm install anpr-wiegand
 ## Usage
 
 ```ts
-import { encode26, decode26, encode64 } from "anpr-wiegand";
+import { encode26, decode26, encode64, decode64 } from "anpr-wiegand";
 
 // --- Wiegand 26-bit ---
 // Encodes a plate into a 7-character hexadecimal string
@@ -33,20 +33,24 @@ const result26 = await encode26("ABC 123");
 // Output: { wiegand26InHexadecimal: "1A98B4B", facilityCode: 212, idNumber: 50597, ... }
 
 // Decode an existing hex string
-const decoded = await decode26("1A98B4B");
+const decoded26 = await decode26("1A98B4B");
 
 // --- Wiegand 64-bit ---
-const hex64 = encode64("ABC 123");
+const hex64 = await encode64("ABC 123");
 // Output: "6000011C1FBD3615"
+
+// Decode 64-bit
+const decoded64 = await decode64("6000011C1FBD3615");
+// Output: "ABC123"
 ```
 
 ---
 
 ## API Reference
 
-### Wiegand 26-bit
+The entire library is asynchronous and uses **Promises**. The 26-bit implementation uses the **Web Crypto API** for SHA-1 hashing.
 
-The 26-bit implementation uses the **Web Crypto API** for SHA-1 hashing, making it compatible with modern browsers and Node.js.
+### Wiegand 26-bit
 
 #### `encode26(licensePlate: string): Promise<Wiegand26Result | undefined>`
 Sanitizes the input and encodes it.
@@ -69,13 +73,13 @@ Parses a Wiegand 26 hexadecimal string back into its constituent numeric fields.
 
 ### Wiegand 64-bit
 
-#### `encode64(licensePlate: string): string | undefined`
+#### `encode64(licensePlate: string): Promise<string | undefined>`
 Encodes up to 10 characters using a 6-bit character mapping.
 - **Input:** Up to 10 alphanumeric characters.
 - **Output:** A 16-character hexadecimal string.
 
-#### `decode64(hex: string): string | undefined`
-Decodes a Wiegand 64-bit hexadecimal string back into a license plate.
+#### `decode64(hex: string): Promise<string | undefined>`
+Decodes a Wiegand 64-bit hexadecimal string back into a license plate. Unknown characters (not matching [A-Z0-9 ]) are decoded as `?`.
 - **Input:** A 16-character hexadecimal string.
 - **Output:** The uppercase license plate string.
 

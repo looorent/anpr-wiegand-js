@@ -3,20 +3,20 @@ import { decode, encode } from "../src/internal/wiegand64";
 
 describe("wiegand64", () => {
   describe("encode", () => {
-    it("returns undefined for null", () => {
-      expect(encode(null)).toBeUndefined();
+    it("returns undefined for null", async () => {
+      expect(await encode(null)).toBeUndefined();
     });
 
-    it("returns undefined for undefined", () => {
-      expect(encode(undefined)).toBeUndefined();
+    it("returns undefined for undefined", async () => {
+      expect(await encode(undefined)).toBeUndefined();
     });
 
-    it.each(["", "   ", " "])("returns undefined for blank input '%s'", (blank) => {
-      expect(encode(blank)).toBeUndefined();
+    it.each(["", "   ", " "])("returns undefined for blank input '%s'", async (blank) => {
+      expect(await encode(blank)).toBeUndefined();
     });
 
-    it.each(["azertyuiop0987", "1234567899879825", "nnnnnnnnnnnnnnnn"])("throws for very long plate '%s'", (plate) => {
-      expect(() => encode(plate)).toThrow();
+    it.each(["azertyuiop0987", "1234567899879825", "nnnnnnnnnnnnnnnn"])("throws for very long plate '%s'", async (plate) => {
+      await expect(encode(plate)).rejects.toThrow();
     });
 
     it.each([
@@ -31,8 +31,8 @@ describe("wiegand64", () => {
       ["1FRDEERE", "600045FADD79EADE"],
       ["2ZZD456", "6000012CF3754556"],
       ["1T1234", "600000046D4524D4"],
-    ])("encode('%s') returns '%s'", (plate, expectedHash) => {
-      const result = encode(plate);
+    ])("encode('%s') returns '%s'", async (plate, expectedHash) => {
+      const result = await encode(plate);
       expect(result).toBe(expectedHash);
       expect(result?.length).toBe(16);
     });
@@ -50,8 +50,8 @@ describe("wiegand64", () => {
       ["WAP", "60000000000306A9"],
       ["IU", "60000000000008AE"],
       ["PL", "6000000000000A65"],
-    ])("encode('%s') (short plate) returns '%s'", (plate, expectedHash) => {
-      const result = encode(plate);
+    ])("encode('%s') (short plate) returns '%s'", async (plate, expectedHash) => {
+      const result = await encode(plate);
       expect(result).toBe(expectedHash);
       expect(result?.length).toBe(16);
     });
@@ -60,24 +60,24 @@ describe("wiegand64", () => {
       ["HK 55 EVB", "600002191555EBDB"],
       ["VR46#T", "600000002FAD45AD"],
       [" VR46#T   ", "600000002FAD45AD"],
-    ])("encode('%s') (special chars) returns '%s'", (plate, expectedHash) => {
-      const result = encode(plate);
+    ])("encode('%s') (special chars) returns '%s'", async (plate, expectedHash) => {
+      const result = await encode(plate);
       expect(result).toBe(expectedHash);
       expect(result?.length).toBe(16);
     });
   });
 
   describe("decode", () => {
-    it("returns undefined for null", () => {
-      expect(decode(null)).toBeUndefined();
+    it("returns undefined for null", async () => {
+      expect(await decode(null)).toBeUndefined();
     });
 
-    it("returns undefined for undefined", () => {
-      expect(decode(undefined)).toBeUndefined();
+    it("returns undefined for undefined", async () => {
+      expect(await decode(undefined)).toBeUndefined();
     });
 
-    it.each(["", "   ", " "])("returns undefined for blank input '%s'", (blank) => {
-      expect(decode(blank)).toBeUndefined();
+    it.each(["", "   ", " "])("returns undefined for blank input '%s'", async (blank) => {
+      expect(await decode(blank)).toBeUndefined();
     });
 
     it.each([
@@ -89,8 +89,8 @@ describe("wiegand64", () => {
       ["6FFFFFFFFFFFFFFF", "??????????"],
       // 0x600000000000003F = Header (6) + nine blocks of 000000 (space) + one block of 111111 (63) -> " ?" -> trimmed to "?"
       ["600000000000003F", "?"],
-    ])("decode('%s') returns '%s'", (hex, expectedPlate) => {
-      expect(decode(hex)).toBe(expectedPlate);
+    ])("decode('%s') returns '%s'", async (hex, expectedPlate) => {
+      expect(await decode(hex)).toBe(expectedPlate);
     });
   });
 });
