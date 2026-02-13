@@ -94,7 +94,7 @@ function leastSignificant24Bits(binary: Uint8Array): bigint {
   const b1 = BigInt(binary[len - 3] & 0xff);
   const b2 = BigInt(binary[len - 2] & 0xff);
   const b3 = BigInt(binary[len - 1] & 0xff);
-  
+
   return (b1 << 16n) | (b2 << 8n) | b3;
 }
 
@@ -147,7 +147,7 @@ function parseWiegand26(wiegand26InHexadecimal: string, binaryPosition: number, 
   }
 
   let binaryRepresentation = BigInt(`0x${wiegand26InHexadecimal}`).toString(2);
-  
+
   if (binaryRepresentation.length > WIEGAND26_LENGTH) {
     throw new Error("Wiegand26 is too long.");
   }
