@@ -6,8 +6,13 @@ const MAX_NUMBER_OF_CHARACTERS = 10;
 const HEADER = BigInt(0b0110) << 60n;
 const NUMBER_OF_BITS_PER_CHARACTER = 6;
 
-const MAPPINGS: Map<string, number> = initializeMappings();
-const REVERSE_MAPPINGS: Map<number, string> = initializeReverseMappings();
+const CHARACTER_SET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const VALUE_OFFSET = 0b010000;
+const REVERSE_LOOKUP: string[] = new Array(64).fill("?");
+REVERSE_LOOKUP[EMPTY] = " ";
+for (let i = 0; i < CHARACTER_SET.length; i++) {
+  REVERSE_LOOKUP[VALUE_OFFSET + i] = CHARACTER_SET[i];
+}
 
 /**
  * Converts a license plate to a Wiegand 64-bit hexadecimal string.
@@ -41,7 +46,7 @@ export function decode(wiegand64InHexadecimal: string | null | undefined): strin
     for (let i = 0; i < MAX_NUMBER_OF_CHARACTERS; i++) {
       const shift = BigInt(NUMBER_OF_BITS_PER_CHARACTER * (MAX_NUMBER_OF_CHARACTERS - i - 1));
       const charBits = Number((bits >> shift) & 0b111111n);
-      const char = REVERSE_MAPPINGS.get(charBits) ?? "?";
+      const char = REVERSE_LOOKUP[charBits] ?? "?";
       result += char;
     }
     return result.trim();
@@ -50,28 +55,17 @@ export function decode(wiegand64InHexadecimal: string | null | undefined): strin
   }
 }
 
-
-function initializeMappings(): Map<string, number> {
-  const characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const zero = 0b010000;
-  const mapping = new Map<string, number>();
-  for (let i = 0; i < characters.length; i++) {
-    mapping.set(characters[i], zero + i);
-  }
-  mapping.set(" ", EMPTY);
-  return mapping;
-}
-
-function initializeReverseMappings(): Map<number, string> {
-  const mapping = new Map<number, string>();
-  for (const [char, value] of MAPPINGS) {
-    mapping.set(value, char);
-  }
-  return mapping;
-}
-
 function findBinaryRepresentationOf(character: string): number {
-  return MAPPINGS.get(character) ?? UNKNOWN_CHARACTER;
+  if (character === " ") {
+    return EMPTY;
+  } else {
+    const index = CHARACTER_SET.indexOf(character);
+    if (index !== -1) {
+      return VALUE_OFFSET + index;
+    } else {
+      return UNKNOWN_CHARACTER;
+    }
+  }
 }
 
 function computeBinaryMask(position: number, character: string): bigint {
