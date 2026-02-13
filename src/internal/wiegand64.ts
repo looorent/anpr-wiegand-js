@@ -11,13 +11,10 @@ const NUMBER_OF_BITS_PER_CHARACTER = 6;
 // So we use an offset of 16 when mapping index -> value
 const CHARACTER_SET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VALUE_OFFSET = 0b010000;
-
-// Reverse lookup array: index = Wiegand value, value = character
 const REVERSE_LOOKUP: string[] = new Array(64).fill("?");
-// Populate reverse lookup
-REVERSE_LOOKUP[EMPTY] = " "; // 0 -> Space
+REVERSE_LOOKUP[EMPTY] = " ";
 for (let i = 0; i < CHARACTER_SET.length; i++) {
-  REVERSE_LOOKUP[VALUE_OFFSET + i] = CHARACTER_SET[i];
+  REVERSE_LOOKUP[VALUE_OFFSET + i] = CHARACTER_SET[i] ?? "";
 }
 
 /**
@@ -86,7 +83,8 @@ function on64Bits(plate: string): bigint {
   const characters = toArrayOfCharacters(plate);
   let bits = HEADER;
   for (let position = 0; position < MAX_NUMBER_OF_CHARACTERS; position++) {
-    bits |= computeBinaryMask(position, characters[position]);
+    const character = characters[position] ?? " ";
+    bits |= computeBinaryMask(position, character);
   }
   return bits;
 }

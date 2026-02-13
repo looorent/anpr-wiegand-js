@@ -91,9 +91,9 @@ function concatenateFacilityCodeAndIdNumber(facilityCode: number, idNumber: numb
 
 function leastSignificant24Bits(binary: Uint8Array): bigint {
   const len = binary.length;
-  const b1 = BigInt(binary[len - 3] & 0xff);
-  const b2 = BigInt(binary[len - 2] & 0xff);
-  const b3 = BigInt(binary[len - 1] & 0xff);
+  const b1 = BigInt((binary[len - 3] || 0) & 0xff);
+  const b2 = BigInt((binary[len - 2] || 0) & 0xff);
+  const b3 = BigInt((binary[len - 1] || 0) & 0xff);
 
   return (b1 << 16n) | (b2 << 8n) | b3;
 }

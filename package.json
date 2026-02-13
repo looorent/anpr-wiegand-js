@@ -1,6 +1,6 @@
 {
   "name": "anpr-wiegand",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Format license plates to the Wiegand format (26-bit and 64-bit) for ANPR systems",
   "type": "module",
   "exports": {
@@ -25,7 +25,7 @@
   "scripts": {
     "build": "tsdown",
     "lint": "biome check .",
-    "format": "biome check --fix .",
+    "lint:fix": "biome check --fix .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
