@@ -43,7 +43,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/loremipsum/anpr-wiegand.git"
+    "url": "git+https://github.com/looorent/anpr-wiegand.git"
+  },
+  "homepage": "https://github.com/looorent/anpr-wiegand#readme",
+  "bugs": {
+    "url": "https://github.com/looorent/anpr-wiegand/issues"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.15",
