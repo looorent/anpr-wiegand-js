@@ -89,47 +89,51 @@ function concatenateFacilityCodeAndIdNumber(facilityCode: number, idNumber: numb
   return parseInt(`${facilityCode}${String(idNumber).padStart(5, "0")}`, 10);
 }
 
-function leastSignificant24Bits(binary: Uint8Array): number {
+function leastSignificant24Bits(binary: Uint8Array): bigint {
   const len = binary.length;
-  return ((binary[len - 3] & 0xff) << 16) | ((binary[len - 2] & 0xff) << 8) | (binary[len - 1] & 0xff);
+  const b1 = BigInt(binary[len - 3] & 0xff);
+  const b2 = BigInt(binary[len - 2] & 0xff);
+  const b3 = BigInt(binary[len - 1] & 0xff);
+  
+  return (b1 << 16n) | (b2 << 8n) | b3;
 }
 
-function moveTo26Bits(value: number): number {
-  return value << 1;
+function moveTo26Bits(value: bigint): bigint {
+  return value << 1n;
 }
 
-function bitCount(n: number): number {
-  let count = 0;
+function bitCount(n: bigint): bigint {
+  let count = 0n;
   let v = n;
-  while (v) {
-    count += v & 1;
-    v >>>= 1;
+  while (v > 0n) {
+    count += v & 1n;
+    v >>= 1n;
   }
   return count;
 }
 
-const EVEN_PARITY_FIELD = 0b11111111111110000000000000;
-const EVEN_PARITY_MASK = 0b10000000000000000000000000;
-function setEvenParityBit(value: number): number {
+const EVEN_PARITY_FIELD = 0b11111111111110000000000000n;
+const EVEN_PARITY_MASK = 0b10000000000000000000000000n;
+function setEvenParityBit(value: bigint): bigint {
   const oneBits = bitCount(value & EVEN_PARITY_FIELD);
-  const mustAddParityBit = oneBits % 2 !== 0;
+  const mustAddParityBit = oneBits % 2n !== 0n;
   return mustAddParityBit ? value | EVEN_PARITY_MASK : value;
 }
 
-const ODD_PARITY_FIELD = 0b00000000000001111111111111;
-const ODD_PARITY_MASK = 0b00000000000000000000000001;
-function setOddParityBit(value: number): number {
+const ODD_PARITY_FIELD = 0b00000000000001111111111111n;
+const ODD_PARITY_MASK = 0b00000000000000000000000001n;
+function setOddParityBit(value: bigint): bigint {
   const oneBits = bitCount(value & ODD_PARITY_FIELD);
-  const mustAddParityBit = oneBits % 2 === 0;
+  const mustAddParityBit = oneBits % 2n === 0n;
   return mustAddParityBit ? value | ODD_PARITY_MASK : value;
 }
 
-function addParityBits(bits: number): number {
+function addParityBits(bits: bigint): bigint {
   return setOddParityBit(setEvenParityBit(bits));
 }
 
-function toHexadecimal(value: number): string {
-  return (value >>> 0).toString(16).toUpperCase().padStart(7, "0");
+function toHexadecimal(value: bigint): string {
+  return value.toString(16).toUpperCase().padStart(7, "0");
 }
 
 function leftPad(text: string, size: number): string {
@@ -142,7 +146,8 @@ function parseWiegand26(wiegand26InHexadecimal: string, binaryPosition: number, 
     throw new Error("A Wiegand26 cannot be empty or blank");
   }
 
-  let binaryRepresentation = parseInt(wiegand26InHexadecimal, 16).toString(2);
+  let binaryRepresentation = BigInt(`0x${wiegand26InHexadecimal}`).toString(2);
+  
   if (binaryRepresentation.length > WIEGAND26_LENGTH) {
     throw new Error("Wiegand26 is too long.");
   }
