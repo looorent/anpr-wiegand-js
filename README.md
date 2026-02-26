@@ -90,3 +90,18 @@ Decodes a Wiegand 64-bit hexadecimal string back into a license plate. Unknown c
 - **Sanitization:** Automatically strips spaces and special characters.
 - **Case Insensitive:** "abc123" and "ABC-123" result in the same encoding.
 - **Zero Dependencies:** Ultra-lightweight and fast.
+
+## Publishing
+
+This package is published to npm with [provenance statements](https://docs.npmjs.com/generating-provenance-statements), which lets you verify that a published version was built from this repository's source code using GitHub Actions — not from a developer's local machine.
+
+Provenance is generated automatically by the `publish.yml` workflow. To publish a new version:
+
+1. Update the version in `package.json`.
+2. Commit and push to `main`.
+3. Create and push a version tag:
+   ```sh
+   git tag v0.1.0
+   git push --tags
+   ```
+4. The GitHub Actions workflow will lint, build, and publish the package to npm with a signed provenance attestation.
