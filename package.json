@@ -1,6 +1,6 @@
 {
   "name": "anpr-wiegand",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Format license plates to the Wiegand format (26-bit and 64-bit) for ANPR systems",
   "type": "module",
   "exports": {
