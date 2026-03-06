@@ -24,43 +24,60 @@ npm install anpr-wiegand
 
 ## Usage
 
-The import is the same regardless of the environment. The package uses [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) to automatically serve an optimized build for Node.js (synchronous `node:crypto`) and a browser-compatible build (Web Crypto API).
+The import is the same regardless of the environment. The package uses [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) to automatically serve an optimized build for Node.js (synchronous `node:crypto`) and a browser-compatible build (async Web Crypto API).
+
+### Node.js
+
+All functions are **synchronous** in Node.js, since `node:crypto` is synchronous.
 
 ```ts
-// Works in both Node.js and browsers — no configuration needed
 import { encode26, decode26, encode64, decode64 } from "anpr-wiegand";
 
 // --- Wiegand 26-bit ---
-// Encodes a plate into a 7-character hexadecimal string
-const result26 = await encode26("ABC 123");
-// Output: { wiegand26InHexadecimal: "1A98B4B", facilityCode: 212, idNumber: 50597, ... }
+const result26 = encode26("ABC 123");
+// { wiegand26InHexadecimal: "1A98B4B", facilityCode: 212, idNumber: 50597, ... }
 
-// Decode an existing hex string
-const decoded26 = await decode26("1A98B4B");
+const decoded26 = decode26("1A98B4B");
 
 // --- Wiegand 64-bit ---
-const hex64 = await encode64("ABC 123");
-// Output: "6000011C1FBD3615"
+const hex64 = encode64("ABC 123");
+// "6000011C1FBD3615"
 
-// Decode 64-bit
-const decoded64 = await decode64("6000011C1FBD3615");
-// Output: "ABC123"
+const decoded64 = decode64("6000011C1FBD3615");
+// "ABC123"
+```
+
+### Browser
+
+In browsers, `encode26` is **async** because the Web Crypto API is inherently asynchronous. All other functions are synchronous.
+
+```ts
+import { encode26, decode26, encode64, decode64 } from "anpr-wiegand";
+
+// encode26 is async in the browser (Web Crypto API)
+const result26 = await encode26("ABC 123");
+
+// decode26, encode64, decode64 are synchronous
+const decoded26 = decode26("1A98B4B");
+const hex64 = encode64("ABC 123");
+const decoded64 = decode64("6000011C1FBD3615");
 ```
 
 ---
 
 ## API Reference
 
-The entire library is asynchronous and uses **Promises**. The package ships separate builds for Node.js and browsers via [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) — the correct one is selected automatically by your runtime or bundler, with zero runtime detection overhead.
+The package ships separate builds for Node.js and browsers via [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) — the correct one is selected automatically by your runtime or bundler, with zero runtime detection overhead.
 
 ### Wiegand 26-bit
 
-#### `encode26(licensePlate: string): Promise<Wiegand26Result | undefined>`
+#### `encode26(licensePlate: string): Wiegand26Result | undefined` (Node.js)
+#### `encode26(licensePlate: string): Promise<Wiegand26Result | undefined>` (Browser)
 Sanitizes the input and encodes it.
 - **Input:** Up to 10 alphanumeric characters.
 - **Output:** A `Wiegand26Result` object or `undefined` if the input is empty.
 
-#### `decode26(hex: string): Promise<Wiegand26Result | undefined>`
+#### `decode26(hex: string): Wiegand26Result | undefined`
 Parses a Wiegand 26 hexadecimal string back into its constituent numeric fields.
 
 #### `Wiegand26Result` Object
@@ -76,12 +93,12 @@ Parses a Wiegand 26 hexadecimal string back into its constituent numeric fields.
 
 ### Wiegand 64-bit
 
-#### `encode64(licensePlate: string): Promise<string | undefined>`
+#### `encode64(licensePlate: string): string | undefined`
 Encodes up to 10 characters using a 6-bit character mapping.
 - **Input:** Up to 10 alphanumeric characters.
 - **Output:** A 16-character hexadecimal string.
 
-#### `decode64(hex: string): Promise<string | undefined>`
+#### `decode64(hex: string): string | undefined`
 Decodes a Wiegand 64-bit hexadecimal string back into a license plate. Unknown characters (not matching [A-Z0-9 ]) are decoded as `?`.
 - **Input:** A 16-character hexadecimal string.
 - **Output:** The uppercase license plate string.
@@ -93,7 +110,7 @@ Decodes a Wiegand 64-bit hexadecimal string back into a license plate. Unknown c
 - **Sanitization:** Automatically strips spaces and special characters.
 - **Case Insensitive:** "abc123" and "ABC-123" result in the same encoding.
 - **Zero Dependencies:** Ultra-lightweight and fast.
-- **Optimized for Node.js:** Uses synchronous `node:crypto` for SHA-1 hashing via conditional exports, avoiding async overhead entirely. Browsers automatically get the Web Crypto API build.
+- **Synchronous on Node.js:** Uses synchronous `node:crypto` for SHA-1 hashing, avoiding async overhead entirely. Only `encode26` is async in browsers (Web Crypto API requirement).
 
 ## Publishing
 

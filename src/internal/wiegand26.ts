@@ -1,6 +1,7 @@
 import { sanitize } from "./sanitize";
 
-type Sha1Provider = (input: string) => Uint8Array | Promise<Uint8Array>;
+type SyncSha1Provider = (input: string) => Uint8Array;
+type AsyncSha1Provider = (input: string) => Promise<Uint8Array>;
 
 const MAX_NUMBER_OF_CHARACTERS = 10;
 const WIEGAND26_LENGTH = 26;
@@ -22,47 +23,63 @@ export interface Wiegand26Result {
   facilityCodeAndIdNumber: number;
 }
 
-/**
- * Creates a Wiegand 26-bit encoder using the provided SHA-1 implementation.
- */
-export function createEncoder(sha1: Sha1Provider) {
-  /**
-   * Converts a license plate to a Wiegand 26-bit hexadecimal string.
-   * @param textLicensePlate must have length <= 10 characters
-   * @returns an uppercase hexadecimal representation in the Wiegand 26-bit format, or undefined when the provided license plate is blank or null
-   * @throws Error when the license plate exceeds 10 characters
-   */
-  return async function encode(textLicensePlate: string | null | undefined): Promise<Wiegand26Result | undefined> {
-    const sanitized = sanitize(textLicensePlate);
-    if (sanitized) {
-      if (sanitized.length > MAX_NUMBER_OF_CHARACTERS) {
-        throw new Error(
-          `Wiegand26 does not support license plate containing more than ${MAX_NUMBER_OF_CHARACTERS} characters: ${sanitized}`,
-        );
-      }
-      const shaOne = await sha1(sanitized);
-      const len = shaOne.length;
-      const bits24 = (((shaOne[len - 3] ?? 0) & 0xff) << 16) | (((shaOne[len - 2] ?? 0) & 0xff) << 8) | ((shaOne[len - 1] ?? 0) & 0xff);
-      const bits26 = bits24 << 1;
-      const withParity = addParityBits(bits26);
-      const wiegand26InHexadecimal = (withParity >>> 0).toString(16).toUpperCase().padStart(7, "0");
-      const payload = (withParity >> 1) & 0xffffff;
-      const facilityCode = (payload >> 16) & 0xff;
-      const idNumber = payload & 0xffff;
-      return {
-        wiegand26InHexadecimal,
-        wiegand26InDecimal: payload,
-        facilityCode,
-        idNumber,
-        facilityCodeAndIdNumber: concatenateFacilityCodeAndIdNumber(facilityCode, idNumber),
-      };
-    } else {
-      return undefined;
-    }
+function computeWiegand26(shaOne: Uint8Array): Wiegand26Result {
+  const len = shaOne.length;
+  const bits24 = (((shaOne[len - 3] ?? 0) & 0xff) << 16) | (((shaOne[len - 2] ?? 0) & 0xff) << 8) | ((shaOne[len - 1] ?? 0) & 0xff);
+  const bits26 = bits24 << 1;
+  const withParity = addParityBits(bits26);
+  const wiegand26InHexadecimal = (withParity >>> 0).toString(16).toUpperCase().padStart(7, "0");
+  const payload = (withParity >> 1) & 0xffffff;
+  const facilityCode = (payload >> 16) & 0xff;
+  const idNumber = payload & 0xffff;
+  return {
+    wiegand26InHexadecimal,
+    wiegand26InDecimal: payload,
+    facilityCode,
+    idNumber,
+    facilityCodeAndIdNumber: concatenateFacilityCodeAndIdNumber(facilityCode, idNumber),
   };
 }
 
-export async function decode(wiegand26InHexadecimal: string | null | undefined): Promise<Wiegand26Result | undefined> {
+function validateAndSanitize(textLicensePlate: string | null | undefined): string | undefined {
+  const sanitized = sanitize(textLicensePlate);
+  if (sanitized) {
+    if (sanitized.length > MAX_NUMBER_OF_CHARACTERS) {
+      throw new Error(
+        `Wiegand26 does not support license plate containing more than ${MAX_NUMBER_OF_CHARACTERS} characters: ${sanitized}`,
+      );
+    }
+  }
+  return sanitized;
+}
+
+/**
+ * Creates a synchronous Wiegand 26-bit encoder using a synchronous SHA-1 implementation.
+ */
+export function createSyncEncoder(sha1: SyncSha1Provider) {
+  return function encode(textLicensePlate: string | null | undefined): Wiegand26Result | undefined {
+    const sanitized = validateAndSanitize(textLicensePlate);
+    if (sanitized) {
+      return computeWiegand26(sha1(sanitized));
+    }
+    return undefined;
+  };
+}
+
+/**
+ * Creates an asynchronous Wiegand 26-bit encoder using an async SHA-1 implementation (e.g. WebCrypto).
+ */
+export function createAsyncEncoder(sha1: AsyncSha1Provider) {
+  return async function encode(textLicensePlate: string | null | undefined): Promise<Wiegand26Result | undefined> {
+    const sanitized = validateAndSanitize(textLicensePlate);
+    if (sanitized) {
+      return computeWiegand26(await sha1(sanitized));
+    }
+    return undefined;
+  };
+}
+
+export function decode(wiegand26InHexadecimal: string | null | undefined): Wiegand26Result | undefined {
   if (wiegand26InHexadecimal && wiegand26InHexadecimal.length > 0) {
     const value = parseInt(wiegand26InHexadecimal, 16);
     if (value >= 1 << WIEGAND26_LENGTH) {
@@ -78,9 +95,8 @@ export async function decode(wiegand26InHexadecimal: string | null | undefined):
       idNumber,
       facilityCodeAndIdNumber: concatenateFacilityCodeAndIdNumber(facilityCode, idNumber),
     };
-  } else {
-    return undefined;
   }
+  return undefined;
 }
 
 /**

@@ -20,10 +20,10 @@ for (let i = 0; i < CHARACTER_SET.length; i++) {
 /**
  * Converts a license plate to a Wiegand 64-bit hexadecimal string.
  * @param textLicencePlate must have length <= 10 characters
- * @returns a Promise resolving to an uppercase hexadecimal representation in the Wiegand 64-bit format, or undefined when the provided license plate is blank or null
+ * @returns an uppercase hexadecimal representation in the Wiegand 64-bit format, or undefined when the provided license plate is blank or null
  * @throws Error when the license plate exceeds 10 characters
  */
-export async function encode(textLicencePlate: string | null | undefined): Promise<string | undefined> {
+export function encode(textLicencePlate: string | null | undefined): string | undefined {
   const sanitized = sanitize(textLicencePlate);
   if (sanitized && sanitized?.length > 0) {
     if (sanitized.length > MAX_NUMBER_OF_CHARACTERS) {
@@ -31,18 +31,17 @@ export async function encode(textLicencePlate: string | null | undefined): Promi
     }
     const bits = on64Bits(sanitized);
     return bits.toString(16).toUpperCase();
-  } else {
-    return undefined;
   }
+  return undefined;
 }
 
 /**
  * Decodes a Wiegand 64-bit hexadecimal string back to a license plate.
  * Unknown characters (not matching [A-Z0-9 ]) are decoded as "?".
  * @param wiegand64InHexadecimal a 16-character hexadecimal string
- * @returns a Promise resolving to the decoded license plate (uppercase), or undefined if the input is empty
+ * @returns the decoded license plate (uppercase), or undefined if the input is empty
  */
-export async function decode(wiegand64InHexadecimal: string | null | undefined): Promise<string | undefined> {
+export function decode(wiegand64InHexadecimal: string | null | undefined): string | undefined {
   if (wiegand64InHexadecimal && wiegand64InHexadecimal.trim().length > 0) {
     const bits = BigInt(`0x${wiegand64InHexadecimal}`);
     let result = "";
@@ -53,9 +52,8 @@ export async function decode(wiegand64InHexadecimal: string | null | undefined):
       result += char;
     }
     return result.trim();
-  } else {
-    return undefined;
   }
+  return undefined;
 }
 
 function findBinaryRepresentationOf(character: string): number {

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-06
+
+* [Breaking] **Node.js: all functions are now synchronous.** `encode26`, `decode26`, `encode64`, and `decode64` no longer return Promises in the Node.js build. If you were using `await`, simply remove it.
+* [Breaking] **Browser: `decode26`, `encode64`, `decode64` are now synchronous.** Only `encode26` remains async in the browser build (Web Crypto API requirement).
+* [Performance] Eliminate unnecessary async/await overhead on Node.js by using a synchronous encoder backed by `node:crypto`.
+* Make `decode26`, `encode64`, and `decode64` fully synchronous on all platforms (they never needed async).
+
 ## [1.0.5] - 2026-03-06
 
 * [Performance] Ship separate Node.js and browser builds via conditional `package.json` exports. Node.js uses synchronous `node:crypto` for SHA-1 hashing; browsers use the Web Crypto API. Zero runtime detection overhead.

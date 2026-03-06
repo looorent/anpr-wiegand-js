@@ -1,25 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { sha1 } from "../src/internal/sha1.node";
-import { createEncoder, decode, readDecimalPayload, readFacilityCodeFrom, readIdNumberFrom } from "../src/internal/wiegand26";
+import { createSyncEncoder, decode, readDecimalPayload, readFacilityCodeFrom, readIdNumberFrom } from "../src/internal/wiegand26";
 
-const encode = createEncoder(sha1);
+const encode = createSyncEncoder(sha1);
 
 describe("wiegand26", () => {
   describe("encode", () => {
-    it("returns undefined for null", async () => {
-      expect(await encode(null)).toBeUndefined();
+    it("returns undefined for null", () => {
+      expect(encode(null)).toBeUndefined();
     });
 
-    it("returns undefined for undefined", async () => {
-      expect(await encode(undefined)).toBeUndefined();
+    it("returns undefined for undefined", () => {
+      expect(encode(undefined)).toBeUndefined();
     });
 
-    it.each(["", "   ", " "])("returns undefined for blank input '%s'", async (blank) => {
-      expect(await encode(blank)).toBeUndefined();
+    it.each(["", "   ", " "])("returns undefined for blank input '%s'", (blank) => {
+      expect(encode(blank)).toBeUndefined();
     });
 
-    it.each(["azertyuiop0987", "1234567899879825", "nnnnnnnnnnnnnnnn"])("throws for very long plate '%s'", async (plate) => {
-      await expect(encode(plate)).rejects.toThrow();
+    it.each(["azertyuiop0987", "1234567899879825", "nnnnnnnnnnnnnnnn"])("throws for very long plate '%s'", (plate) => {
+      expect(() => encode(plate)).toThrow();
     });
 
     it.each([
@@ -31,8 +31,8 @@ describe("wiegand26", () => {
       ["AZERTYUIOI", "006D2EC"],
       ["1FRDEERE", "1A7622D"],
       ["2ZZD456", "2866DD8"],
-    ])("encode('%s') returns hex '%s'", async (plate, expectedHex) => {
-      const result = await encode(plate);
+    ])("encode('%s') returns hex '%s'", (plate, expectedHex) => {
+      const result = encode(plate);
       expect(result?.wiegand26InHexadecimal).toBe(expectedHex);
       expect(result?.wiegand26InHexadecimal.length).toBe(7);
     });
@@ -45,8 +45,8 @@ describe("wiegand26", () => {
       ["YUIOI", "3A9BABB"],
       ["ERE", "08F4AEC"],
       ["56", "3EB746E"],
-    ])("encode('%s') (short plate) returns hex '%s'", async (plate, expectedHex) => {
-      const result = await encode(plate);
+    ])("encode('%s') (short plate) returns hex '%s'", (plate, expectedHex) => {
+      const result = encode(plate);
       expect(result?.wiegand26InHexadecimal).toBe(expectedHex);
       expect(result?.wiegand26InHexadecimal.length).toBe(7);
     });
@@ -64,24 +64,24 @@ describe("wiegand26", () => {
       ["azer)TYUIOI", "006D2EC"],
       ["1FR//DEERE", "1A7622D"],
       ["2ZZD4;;..56", "2866DD8"],
-    ])("encode('%s') (special chars) returns hex '%s'", async (plate, expectedHex) => {
-      const result = await encode(plate);
+    ])("encode('%s') (special chars) returns hex '%s'", (plate, expectedHex) => {
+      const result = encode(plate);
       expect(result?.wiegand26InHexadecimal).toBe(expectedHex);
       expect(result?.wiegand26InHexadecimal.length).toBe(7);
     });
   });
 
   describe("decode", () => {
-    it("returns undefined for null", async () => {
-      expect(await decode(null)).toBeUndefined();
+    it("returns undefined for null", () => {
+      expect(decode(null)).toBeUndefined();
     });
 
-    it("returns undefined for empty string", async () => {
-      expect(await decode("")).toBeUndefined();
+    it("returns undefined for empty string", () => {
+      expect(decode("")).toBeUndefined();
     });
 
-    it("returns all fields for a valid plate", async () => {
-      const result = await decode("1A98B4B");
+    it("returns all fields for a valid plate", () => {
+      const result = decode("1A98B4B");
       expect(result).toEqual({
         wiegand26InHexadecimal: "1A98B4B",
         facilityCode: 212,
@@ -91,8 +91,8 @@ describe("wiegand26", () => {
       });
     });
 
-    it("returns all fields for another plate", async () => {
-      const result = await decode("31C234A");
+    it("returns all fields for another plate", () => {
+      const result = decode("31C234A");
       expect(result).toEqual({
         wiegand26InHexadecimal: "31C234A",
         facilityCode: 142,
