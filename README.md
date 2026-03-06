@@ -24,12 +24,15 @@ npm install anpr-wiegand
 
 ## Usage
 
+The import is the same regardless of the environment. The package uses [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) to automatically serve an optimized build for Node.js (synchronous `node:crypto`) and a browser-compatible build (Web Crypto API).
+
 ```ts
+// Works in both Node.js and browsers — no configuration needed
 import { encode26, decode26, encode64, decode64 } from "anpr-wiegand";
 
 // --- Wiegand 26-bit ---
 // Encodes a plate into a 7-character hexadecimal string
-const result26 = await encode26("ABC 123"); 
+const result26 = await encode26("ABC 123");
 // Output: { wiegand26InHexadecimal: "1A98B4B", facilityCode: 212, idNumber: 50597, ... }
 
 // Decode an existing hex string
@@ -48,7 +51,7 @@ const decoded64 = await decode64("6000011C1FBD3615");
 
 ## API Reference
 
-The entire library is asynchronous and uses **Promises**. The 26-bit implementation uses the **Web Crypto API** for SHA-1 hashing.
+The entire library is asynchronous and uses **Promises**. The package ships separate builds for Node.js and browsers via [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) — the correct one is selected automatically by your runtime or bundler, with zero runtime detection overhead.
 
 ### Wiegand 26-bit
 
@@ -90,6 +93,7 @@ Decodes a Wiegand 64-bit hexadecimal string back into a license plate. Unknown c
 - **Sanitization:** Automatically strips spaces and special characters.
 - **Case Insensitive:** "abc123" and "ABC-123" result in the same encoding.
 - **Zero Dependencies:** Ultra-lightweight and fast.
+- **Optimized for Node.js:** Uses synchronous `node:crypto` for SHA-1 hashing via conditional exports, avoiding async overhead entirely. Browsers automatically get the Web Crypto API build.
 
 ## Publishing
 

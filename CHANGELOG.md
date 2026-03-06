@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-03-06
+
+* [Performance] Ship separate Node.js and browser builds via conditional `package.json` exports. Node.js uses synchronous `node:crypto` for SHA-1 hashing; browsers use the Web Crypto API. Zero runtime detection overhead.
+* [Performance] Replace `BigInt` operations with native `number` bitwise operations in Wiegand 26-bit encoding/decoding.
+* [Performance] Eliminate redundant hex-to-binary parsing in `decode` (single `parseInt` + bit shifts instead of three separate conversions).
+* [Performance] Remove `encode` → `decode` round-trip; build the result directly from computed values.
+
 ## [1.0.4] - 2026-03-03
 
 * Include `CHANGELOG.md` in the published npm package.

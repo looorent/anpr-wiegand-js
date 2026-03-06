@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { decode, encode, readDecimalPayload, readFacilityCodeFrom, readIdNumberFrom } from "../src/internal/wiegand26";
+import { sha1 } from "../src/internal/sha1.node";
+import { createEncoder, decode, readDecimalPayload, readFacilityCodeFrom, readIdNumberFrom } from "../src/internal/wiegand26";
+
+const encode = createEncoder(sha1);
 
 describe("wiegand26", () => {
   describe("encode", () => {

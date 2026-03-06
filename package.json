@@ -5,13 +5,25 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
+      "node": {
+        "import": {
+          "types": "./dist/node/index.d.mts",
+          "default": "./dist/node/index.mjs"
+        },
+        "require": {
+          "types": "./dist/node/index.d.cts",
+          "default": "./dist/node/index.cjs"
+        }
       },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
+      "default": {
+        "import": {
+          "types": "./dist/browser/index.d.mts",
+          "default": "./dist/browser/index.mjs"
+        },
+        "require": {
+          "types": "./dist/browser/index.d.cts",
+          "default": "./dist/browser/index.cjs"
+        }
       }
     }
   },
@@ -51,11 +63,11 @@
     "url": "https://github.com/looorent/anpr-wiegand-js/issues"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.5",
-    "@types/node": "25.3.3",
+    "@biomejs/biome": "2.4.6",
+    "@types/node": "25.3.5",
     "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "4.0.18",
-    "tsdown": "0.20.3",
+    "tsdown": "0.21.0",
     "typescript": "5.9.3",
     "vitest": "4.0.18"
   }
