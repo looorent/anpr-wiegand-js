@@ -45,9 +45,7 @@ function validateAndSanitize(textLicensePlate: string | null | undefined): strin
   const sanitized = sanitize(textLicensePlate);
   if (sanitized) {
     if (sanitized.length > MAX_NUMBER_OF_CHARACTERS) {
-      throw new Error(
-        `Wiegand26 does not support license plate containing more than ${MAX_NUMBER_OF_CHARACTERS} characters: ${sanitized}`,
-      );
+      throw new Error(`Wiegand26 does not support license plate containing more than ${MAX_NUMBER_OF_CHARACTERS} characters: ${sanitized}`);
     }
   }
   return sanitized;
